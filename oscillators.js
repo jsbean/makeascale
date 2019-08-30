@@ -5,10 +5,11 @@ class Synth {
     this.maxNoteLength = maxNoteLength;
     this.initialized = false;
 
-    this.attack = 0;
+    this.attack = 0.05;
     this.delay = 0.2;
     this.sustain = 0.2;
     this.release = 1.2;
+    this.maxVolume = 0.02;
 
     this.notePlaying = false;
   }
@@ -38,7 +39,6 @@ class Synth {
 
     
     this.oscillator.frequency.value = freq;
-    this.gainNode.gain.setValueAtTime(0.0001, time);
     this.gainNode.gain.exponentialRampToValueAtTime(1, time+this.attack);
     this.gainNode.gain.exponentialRampToValueAtTime(this.sustain, time+this.attack+this.delay);
             
