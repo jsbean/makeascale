@@ -20,6 +20,20 @@ class MainSimulation{
             release: 1.2
           }
         }).toMaster()
+        this.synth = null;
+
+        this.synthSettings = {
+          oscillator: {
+            type: "sine",
+            volume: -20
+          },
+          envelope: {
+            attack: 0.05,
+            decay: 0,
+            sustain: 1,
+            release: 1.2
+          }
+        }
 
         this.showEqualTemperamentLines = false;
         this.highestAllowedInterval = 1.5**30;
