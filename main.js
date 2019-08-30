@@ -16,8 +16,6 @@ class MainSimulation{
         this.targetLerpFactor = 0;
         this.targetMode = "linear";
         this.currentMode = "linear";
-
-        this.numOctaveDivisions = 12;
     }
 
     start(){
@@ -286,7 +284,7 @@ class MainSimulation{
         context.lineWidth = 3;
         if(this.showEqualTemperamentLines){
 
-            let distanceBetweenTicks = 1/this.numOctaveDivisions;
+            let distanceBetweenTicks = 1/12;
             if(this.currentMode == "fifths" || this.targetMode == "fifths"){
                 distanceBetweenTicks = 7/12;
             }
