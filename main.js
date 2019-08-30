@@ -20,21 +20,6 @@ class MainSimulation{
             release: 1.2
           }
         }).toMaster()
-        this.synth = null;
-
-       this.synthSettings = {
-          oscillator: {
-            type: "sine",
-            volume: -20
-          },
-          envelope: {
-            attack: 0.05,
-            decay: 0,
-            sustain: 1,
-            release: 1.2
-          }
-        }
-
 
         this.showEqualTemperamentLines = false;
         this.highestAllowedInterval = 1.5**30;
@@ -58,6 +43,8 @@ class MainSimulation{
 
         this.centerPos = [this.width/2, this.height/2];
 
+        this.update();
+
         window.addEventListener("mousemove", this.onmousemove.bind(this));
         window.addEventListener("mousedown", this.onmousedown.bind(this));
         window.addEventListener("mouseup", this.onmouseup.bind(this));
@@ -66,8 +53,6 @@ class MainSimulation{
         window.addEventListener("touchstart", this.ontouchstart.bind(this),{'passive':false});
         window.addEventListener("touchend", this.onmouseup.bind(this),{'passive':false});
         window.addEventListener("touchcancel", this.onmouseup.bind(this),{'passive':false});
-
-        this.update();
     }
 
     updateCanvasSize(){
@@ -90,27 +75,29 @@ class MainSimulation{
         let referenceOctaveNumber = Math.log(440)/Math.log(2); //orient the angles so that 440 is on the right
 
         return ((octaveNumber - referenceOctaveNumber) % 1)*Math.PI*2;
-    }
 
-    unadjustedFifthsAngle(freq){
-        //helper function for fifthsFreqToAngle
-            let octaveNumber = Math.log(freq)/Math.log(2);
-            let referenceOctaveNumber = Math.log(440)/Math.log(2); //orient the angles so that 440 is on the right
-            return ((octaveNumber - referenceOctaveNumber)/(7/12) * (Math.PI/6));
     }
 
     fifthsFreqToAngle(freq){
-        //convert a frequency to the angle to display at in fifths mode
-        //it's unadjustedFifthsAngle(freq), but rotate the circle to ensure that this.fundamentalFreq has the same angle in radial and fifths mode
-        let fundamentalFifthsAngle = unadjustedFifthsAngle(this.fundamentalFreq);
+
+
+        let freqToFifthsAngle = (freq) => {
+
+            let octaveNumber = Math.log(freq)/Math.log(2);
+            let referenceOctaveNumber = Math.log(440)/Math.log(2); //orient the angles so that 440 is on the right
+            return ((octaveNumber - referenceOctaveNumber)/(7/12) * (Math.PI/6));
+        }
+
+
+        //now rotate the circle to ensure that this.fundamentalFreq has the same angle in radial and fifths mode
+        let fundamentalFifthsAngle = freqToFifthsAngle(this.fundamentalFreq);
         let normalFundamentalAngle = this.radialFreqToAngle(this.fundamentalFreq);
 
-        return (unadjustedFifthsAngle(freq) - fundamentalFifthsAngle + normalFundamentalAngle) % (Math.PI*2);
+        return (freqToFifthsAngle(freq) - fundamentalFifthsAngle + normalFundamentalAngle) % (Math.PI*2);
 
     }
 
     radialFreqToRenderPos(freq, rOffset = 0){
-        //where should we display a note with frequency freq in radial mode?
     
         let r = Math.min(this.width, this.height) / 3;
         r += rOffset;
@@ -125,7 +112,6 @@ class MainSimulation{
 
 
     fifthsFreqToRenderPos(freq, rOffset = 0){
-        //where should we display a note with frequency freq in fifths mode?
     
         let r = Math.min(this.width, this.height) / 3;
         r += rOffset;
@@ -139,7 +125,7 @@ class MainSimulation{
     }
     linearFreqToRenderPos(freq, rOffset = 0){
 
-        //where should we display a note with frequency freq in linear mode?
+        //on a line instead of a circle. currently broken
         let numOctavesInLine = 2;
         let octaveNumber = Math.log(freq)/Math.log(2);
         let middlePitch = Math.log(880)/Math.log(2);
@@ -149,28 +135,20 @@ class MainSimulation{
     }
 
     freqToRenderPos(freq, rOffset=0){
-        const positionFuncs = {
-            "linear": this.linearFreqToRenderPos.bind(this),
-             "radial": this.radialFreqToRenderPos.bind(this),
-             "fifths": this.fifthsFreqToRenderPos.bind(this),
-        };
+        let linearPos = this.linearFreqToRenderPos(freq, rOffset);
+        let radialPos = this.radialFreqToRenderPos(freq, rOffset);
+        let fifthsPos = this.fifthsFreqToRenderPos(freq, rOffset);
 
-        let pos1 = positionFuncs[this.currentMode](freq, rOffset);
+        let positions = {"linear": linearPos, "radial": radialPos, "fifths": fifthsPos};
 
-        if(this.currentMode == this.targetMode){
-            //if not interpolating between two modes, just compute the position based on the current mode
-            return vecAdd(pos1, this.centerPos);
-        }else{
-            //otherwise, animate a smooth blend between the current mode's position and the target mode's position
-            
-            let pos2 = positionFuncs[this.targetMode](freq, rOffset);
+        
+        let pos1 = positions[this.currentMode], pos2 = positions[this.targetMode];
 
-            //animate transformations more smoothly
-            let cosineInterpolationFactor = 0.5*(Math.cos((this.lerpFactor+1)*Math.PI)+1);
+        //animate transformations more smoothly
+        let cosineInterpolationFactor = 0.5*(Math.cos((this.lerpFactor+1)*Math.PI)+1);
 
-            let combinedPos = lerp(pos1, pos2, cosineInterpolationFactor);
-            return vecAdd(combinedPos, this.centerPos);
-        }
+        let combinedPos = lerp(pos1, pos2, cosineInterpolationFactor);
+        return vecAdd(combinedPos, this.centerPos);
 
     }
 
@@ -275,7 +253,7 @@ class MainSimulation{
 
 
         for(var i=0;i<this.objects.length;i++){
-            this.objects[i].update(dt*60);
+            this.objects[i].update(1);
         }
 
         this.objects = this.objects.filter( (x)=>!x.isDead);
