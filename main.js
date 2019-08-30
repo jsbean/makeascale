@@ -92,13 +92,6 @@ class MainSimulation{
 
     }
 
-    unadjustedFreqToAngle(freq){
-        let octaveNumber = Math.log(freq)/Math.log(2);
-        //orient the angles so that 440 is on the right
-        let referenceOctaveNumber = Math.log(440)/Math.log(2); 
-        return ((octaveNumber - referenceOctaveNumber)/(7/12) * (Math.PI/6));
-    }
-
     fifthsFreqToAngle(freq){
 
 
