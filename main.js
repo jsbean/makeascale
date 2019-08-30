@@ -1,10 +1,26 @@
+let synth = null;
+
 class MainSimulation{
 
     constructor(){
         this.fundamentalFreq = 812;
-        this.objects = [];
 
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.objects = [new FirstNote(this)]; //todo: click to place note
+
+
+        this.synth = new Tone.PolySynth(16, Tone.Synth, {
+          oscillator: {
+            type: "sine",
+            volume: -20
+          },
+          envelope: {
+            attack: 0.05,
+            decay: 0,
+            sustain: 1,
+            release: 1.2
+          }
+        }).toMaster()
+        this.synth = null;
 
        this.synthSettings = {
           oscillator: {
@@ -51,8 +67,6 @@ class MainSimulation{
         window.addEventListener("touchend", this.onmouseup.bind(this),{'passive':false});
         window.addEventListener("touchcancel", this.onmouseup.bind(this),{'passive':false});
 
-        this.objects.push(new FirstNote(this));
-
         this.update();
     }
 
@@ -73,7 +87,7 @@ class MainSimulation{
 
         let octaveNumber = Math.log(freq)/Math.log(2);
 
-        const referenceOctaveNumber = Math.log(440)/Math.log(2); //orient the angles so that 440 is on the right
+        let referenceOctaveNumber = Math.log(440)/Math.log(2); //orient the angles so that 440 is on the right
 
         return ((octaveNumber - referenceOctaveNumber) % 1)*Math.PI*2;
     }
@@ -81,17 +95,17 @@ class MainSimulation{
     unadjustedFifthsAngle(freq){
         //helper function for fifthsFreqToAngle
             let octaveNumber = Math.log(freq)/Math.log(2);
-            const referenceOctaveNumber = Math.log(440)/Math.log(2); //orient the angles so that 440 is on the right
+            let referenceOctaveNumber = Math.log(440)/Math.log(2); //orient the angles so that 440 is on the right
             return ((octaveNumber - referenceOctaveNumber)/(7/12) * (Math.PI/6));
     }
 
     fifthsFreqToAngle(freq){
         //convert a frequency to the angle to display at in fifths mode
         //it's unadjustedFifthsAngle(freq), but rotate the circle to ensure that this.fundamentalFreq has the same angle in radial and fifths mode
-        let fundamentalFifthsAngle = this.unadjustedFifthsAngle(this.fundamentalFreq);
+        let fundamentalFifthsAngle = unadjustedFifthsAngle(this.fundamentalFreq);
         let normalFundamentalAngle = this.radialFreqToAngle(this.fundamentalFreq);
 
-        return (this.unadjustedFifthsAngle(freq) - fundamentalFifthsAngle + normalFundamentalAngle) % (Math.PI*2);
+        return (unadjustedFifthsAngle(freq) - fundamentalFifthsAngle + normalFundamentalAngle) % (Math.PI*2);
 
     }
 
