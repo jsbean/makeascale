@@ -43,8 +43,6 @@ class MainSimulation{
 
         this.centerPos = [this.width/2, this.height/2];
 
-        this.update();
-
         window.addEventListener("mousemove", this.onmousemove.bind(this));
         window.addEventListener("mousedown", this.onmousedown.bind(this));
         window.addEventListener("mouseup", this.onmouseup.bind(this));
@@ -53,6 +51,8 @@ class MainSimulation{
         window.addEventListener("touchstart", this.ontouchstart.bind(this),{'passive':false});
         window.addEventListener("touchend", this.onmouseup.bind(this),{'passive':false});
         window.addEventListener("touchcancel", this.onmouseup.bind(this),{'passive':false});
+
+        this.update();
     }
 
     updateCanvasSize(){
