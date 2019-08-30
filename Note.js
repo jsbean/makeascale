@@ -36,12 +36,6 @@ class Note extends GameObject{
 
         this.synth = new Synth(this.parent.audioContext);
     }
-    getFrequency(){
-        if(this.parent.enableEqualTemperamentSnap){
-            return quantizeToEqualTemperament(this.parent.fundamentalFreq, this.frequency, this.parent.numOctaveDivisions);
-        }
-        return this.frequency;
-    }
 
     drawNoteCircle(context, pos, frequency, isEcho=false){
         let angle = this.parent.radialFreqToAngle(frequency)
@@ -87,10 +81,10 @@ class Note extends GameObject{
 
         if(!this.hasAnnouncedOwnPresence)return;
 
-        this.pos = this.parent.freqToRenderPos(this.getFrequency());
+        this.pos = this.parent.freqToRenderPos(this.frequency);
 
         //the circle
-        this.drawNoteCircle(context, this.pos, this.getFrequency());
+        this.drawNoteCircle(context, this.pos, this.frequency);
 
         //if linear, draw echoes at other octaves
         if(this.parent.currentMode == 'linear'){
@@ -98,7 +92,7 @@ class Note extends GameObject{
             for(var i=-numOctaveEchoes; i<=numOctaveEchoes;i++){
                 if(i==0)continue
 
-                    let newFreq = this.getFrequency() * (2**i);
+                    let newFreq = this.frequency * (2**i);
     
                     let pos = this.parent.freqToRenderPos(newFreq);
 
@@ -116,7 +110,7 @@ class Note extends GameObject{
         if(!this.hasAnnouncedOwnPresence){
              this.hasAnnouncedOwnPresence = true;
             
-            this.currentPlayingFrequency = this.parent.mainOctavize(this.getFrequency());
+            this.currentPlayingFrequency = this.parent.mainOctavize(this.frequency);
             this.synth.triggerAttackRelease(this.currentPlayingFrequency, 1.5);
         }
 
@@ -171,7 +165,7 @@ class Note extends GameObject{
             if(this.parent.currentMode == 'linear' || this.parent.targetMode == "linear"){
                 const numOctaveEchoes = 8;
                 for(var i=-numOctaveEchoes; i<=numOctaveEchoes;i++){
-                    let echoFreq = this.getFrequency() * (2**i);
+                    let echoFreq = this.frequency * (2**i);
                     let pos = this.parent.freqToRenderPos(echoFreq);
 
                     if(dist([x,y],pos) < 30){
@@ -196,7 +190,7 @@ class Note extends GameObject{
     beginToPlay(freq){
 
         if(freq === undefined){
-            freq = this.parent.mainOctavize(this.getFrequency());
+            freq = this.parent.mainOctavize(this.frequency);
         }
 
         if(!this.isPlaying){
@@ -211,7 +205,7 @@ class Note extends GameObject{
       if(this.parent.currentMode == 'linear'){
           const numOctaveEchoes = 8;
           for(var i=-numOctaveEchoes; i<numOctaveEchoes;i++){
-                let echoFreq = this.getFrequency() * (2**i);
+                let echoFreq = this.frequency * (2**i);
                 let pos = this.parent.freqToRenderPos(echoFreq);
                 if(dist([x,y],pos) < 30){
                       this.clicked = true;

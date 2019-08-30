@@ -81,8 +81,19 @@ function quantizeToEqualTemperament(fundamentalFreq, freqToBeQuantized, numDivis
         return Math.pow(2, quantizedPitch);
 }
 
-function toggleSnapNotesToEqualTemperament(){
-    scale.enableEqualTemperamentSnap = !scale.enableEqualTemperamentSnap;
+function snapNotesToEqualTemperament(){
+    //format: [Note, freq]
+    let numDivisions = scale.numOctaveDivisions;
+    for(var i=0;i<scale.objects.length;i++){
+      if((scale.objects[i]).constructor === Note){
+        
+        let freq = scale.objects[i].frequency;
+
+        let quantizedFreq = quantizeToEqualTemperament(scale.fundamentalFreq, freq, numDivisions);
+
+        scale.objects[i].frequency = quantizedFreq;
+      }
+    }
 }
 
 let scaleStarted = false;
